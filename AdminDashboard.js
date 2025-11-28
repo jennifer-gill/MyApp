@@ -156,63 +156,100 @@ const getWeeklyTotal = (employee) => {
   );
 
   // Render check-in cards inside modal
-  const renderCheckinItem = ({ item }) => {
-    const checkIn = new Date(item.check_in_time);
-    const checkOut = item.check_out_time ? new Date(item.check_out_time) : new Date();
-    const diffSeconds = Math.floor((checkOut - checkIn) / 1000);
-    const hours = Math.floor(diffSeconds / 3600);
-    const minutes = Math.floor((diffSeconds % 3600) / 60);
-    const seconds = diffSeconds % 60;
-    const totalTime = `${hours}h ${minutes}m ${seconds}s`;
+const renderCheckinItem = ({ item }) => {
+  const checkIn = new Date(item.check_in_time);
+  const checkOut = item.check_out_time ? new Date(item.check_out_time) : new Date();
+  const diffSeconds = Math.floor((checkOut - checkIn) / 1000);
+  const hours = Math.floor(diffSeconds / 3600);
+  const minutes = Math.floor((diffSeconds % 3600) / 60);
+  const seconds = diffSeconds % 60;
+  const totalTime = `${hours}h ${minutes}m ${seconds}s`;
 
-    return (
-      <View
-        style={{
-          backgroundColor: "#fff",
-          padding: 16,
-          borderRadius: 12,
-          marginBottom: 12,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 3 },
-          shadowOpacity: 0.15,
-          shadowRadius: 6,
-          elevation: 5,
-        }}
-      >
-        <Text style={{ fontSize: 14, fontWeight: "600", color: "#2c3e50", marginBottom: 4 }}>
-          Client: {item.client}
-        </Text>
-        <Text style={{ fontSize: 14, color: "#7f8c8d" }}>
-          Service: {item.service_type}
-        </Text>
-        <Text style={{ fontSize: 14, color: "#7f8c8d" }}>
-          Mode: {item.support_mode}
-        </Text>
-        {item.note && item.note.trim() !== "" && (
-          <Text style={{ fontSize: 14, color: "#7f8c8d", marginTop: 4 }}>
-            Note: {item.note}
-          </Text>
-        )}
+  // Format day, date, month, year and time
+  const formatDate = (date) => {
+    const day = date.toLocaleDateString("en-US", { weekday: "short" }); // Mon
+    const dateNum = date.getDate(); // 25
+    const month = date.toLocaleDateString("en-US", { month: "short" }); // Nov
+    const year = date.getFullYear(); // 2025
+    const time = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    return { formattedDate: `${day}, ${dateNum} ${month} ${year}`, time };
+  };
 
-        <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6 }}>
-          <Ionicons name="location-sharp" size={16} color="#e74c3c" />
-          <Text style={{ marginLeft: 6, fontSize: 13, color: "#34495e" }}>
-            {item.location_text || "Location not available"}
-          </Text>
-        </View>
+  const checkInFormatted = formatDate(checkIn);
+  const checkOutFormatted = formatDate(checkOut);
 
-        <Text style={{ fontSize: 13, color: "#34495e", marginTop: 4 }}>
-          ⏱️ Check-In: {item.check_in_time}
+  return (
+    <View
+      style={{
+        backgroundColor: "#fff",
+        padding: 16,
+        borderRadius: 12,
+        marginBottom: 12,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.15,
+        shadowRadius: 6,
+        elevation: 5,
+      }}
+    >
+      <Text style={{ fontSize: 14, fontWeight: "600", color: "#2c3e50", marginBottom: 4 }}>
+        Client: {item.client}
+      </Text>
+      <Text style={{ fontSize: 14, color: "#7f8c8d" }}>
+        Service: {item.service_type}
+      </Text>
+      <Text style={{ fontSize: 14, color: "#7f8c8d" }}>
+        Mode: {item.support_mode}
+      </Text>
+      {item.note && item.note.trim() !== "" && (
+        <Text style={{ fontSize: 14, color: "#7f8c8d", marginTop: 4 }}>
+          Note: {item.note}
         </Text>
-        <Text style={{ fontSize: 13, color: "#34495e", marginTop: 2 }}>
-          🏁 Check-Out: {item.check_out_time || "—"}
-        </Text>
-        <Text style={{ fontSize: 13, color: "#34495e", marginTop: 2 }}>
-          ⏳ Total Time: {totalTime}
+      )}
+
+      <View style={{ flexDirection: "row", alignItems: "center", marginTop: 6 }}>
+        <Ionicons name="location-sharp" size={16} color="#e74c3c" />
+        <Text style={{ marginLeft: 6, fontSize: 13, color: "#34495e" }}>
+          {item.location_text || "Location not available"}
         </Text>
       </View>
-    );
-  };
+
+      {/* Check-In */}
+      <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", marginTop: 6 }}>
+        <Text style={{ fontSize: 13, marginRight: 6 }}>⏱️ Check-In:</Text>
+        <View style={{ backgroundColor: "#dcd6f7", borderRadius: 6, paddingHorizontal: 6, marginRight: 4, marginBottom: 4 }}>
+          <Text style={{ fontWeight: "700", color: "#6f51ba" }}>{checkInFormatted.formattedDate}</Text>
+        </View>
+        <View style={{ backgroundColor: "#f0f0f0", borderRadius: 6, paddingHorizontal: 6, marginBottom: 4 }}>
+          <Text style={{ fontWeight: "500", color: "#2c3e50" }}>{checkInFormatted.time}</Text>
+        </View>
+      </View>
+
+      {/* Check-Out */}
+      <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", marginTop: 2 }}>
+        <Text style={{ fontSize: 13, marginRight: 6 }}>🏁 Check-Out:</Text>
+        {item.check_out_time ? (
+          <>
+            <View style={{ backgroundColor: "#dcd6f7", borderRadius: 6, paddingHorizontal: 6, marginRight: 4, marginBottom: 4 }}>
+              <Text style={{ fontWeight: "700", color: "#6f51ba" }}>{checkOutFormatted.formattedDate}</Text>
+            </View>
+            <View style={{ backgroundColor: "#f0f0f0", borderRadius: 6, paddingHorizontal: 6, marginBottom: 4 }}>
+              <Text style={{ fontWeight: "500", color: "#2c3e50" }}>{checkOutFormatted.time}</Text>
+            </View>
+          </>
+        ) : (
+          <Text style={{ fontSize: 13, color: "#34495e" }}>—</Text>
+        )}
+      </View>
+
+      {/* Total Time */}
+      <Text style={{ fontSize: 13, color: "#34495e", marginTop: 4 }}>
+        ⏳ Total Time: {totalTime}
+      </Text>
+    </View>
+  );
+};
+
 
   return (
     <View style={{ flex: 1 }}>
@@ -787,11 +824,11 @@ function EmployeeActivityTab({ themeStyles }) {
             <Text style={{ textAlign: 'center', color: '#7f8c8d' }}>No approvals</Text> :
             approvals.map((a,i)=>(
               <View key={i} style={{ ...themeStyles.card, padding: 12, marginBottom: 8 }}>
-                <Text style={{ fontWeight: '700' }}>{a.employee_name || a.engineer_id}</Text>
-                <Text>{a.customer || a.customer_id}</Text>
-                <Text>{new Date(a.start_time).toLocaleString()} - {new Date(a.end_time).toLocaleString()}</Text>
-                <Text>Hours: {a.total_hours}</Text>
-                <Text>Status: {a.status}</Text>
+                <Text style={{ fontWeight: '700',color: '#fff' }}>{a.employee_name || a.engineer_id}</Text>
+                <Text  style={{ color: '#fff' }}>{a.customer || a.customer_id}</Text>
+                <Text  style={{ color: '#fff' }}>{new Date(a.start_time).toLocaleString()} - {new Date(a.end_time).toLocaleString()}</Text>
+                <Text  style={{ color: '#fff' }}>Hours: {a.total_hours}</Text>
+                <Text  style={{ color: '#fff' }}>Status: {a.status}</Text>
               </View>
             ))
           }
@@ -799,11 +836,11 @@ function EmployeeActivityTab({ themeStyles }) {
           {/* ACTIVITY FEED */}
           <Text style={{ ...themeStyles.cardTitle, marginBottom: 10, marginTop: 16 }}>Activity Feed</Text>
           {activityFeed.length === 0 ? 
-            <Text style={{ textAlign: 'center', color: '#7f8c8d' }}>No recent activities</Text> :
+            <Text style={{ textAlign: 'center', color: '#e4ebecff' }}>No recent activities</Text> :
             activityFeed.map((a,i)=>(
               <View key={i} style={{ ...themeStyles.card, padding: 12, marginBottom: 8 }}>
-                <Text style={{ fontWeight: '700' }}>{a.title}</Text>
-                <Text style={{ fontSize: 12, color: '#7f8c8d' }}>{new Date(a.time).toLocaleString()}</Text>
+                <Text style={{ fontWeight: '700', color: '#fff' }}>{a.title}</Text>
+                <Text style={{ fontSize: 12, color: '#fff' }}>{new Date(a.time).toLocaleString()}</Text>
               </View>
             ))
           }
